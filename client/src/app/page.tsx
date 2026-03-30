@@ -1,4 +1,10 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
 export default function Home() {
+  const router = useRouter();
+
   return (
     <main
       className="
@@ -64,6 +70,7 @@ export default function Home() {
       {/* CTA Buttons */}
       <div className="flex flex-col gap-4 w-full max-w-sm">
         <button
+          onClick={() => router.push("/create")}
           className="
             w-full
             bg-[#FF3CAC]
@@ -80,6 +87,7 @@ export default function Home() {
         </button>
 
         <button
+          onClick={() => router.push("/join")}
           className="
             w-full
             bg-[#FFFDF4]
