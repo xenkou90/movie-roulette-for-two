@@ -1,3 +1,5 @@
+import { Movie } from "./tmdb";
+
 export interface Player {
     id: string;
     name: string;
@@ -6,6 +8,7 @@ export interface Player {
 export interface Room {
     code: string;
     players: Player[];
+    movies: Movie[];
 }
 
 const rooms: Record<string, Room> = {};
@@ -14,6 +17,7 @@ export function createRoom(code: string, player: Player): Room {
     const room: Room = {
         code,
         players: [player],
+        movies: [],
     };
     rooms[code] = room;
     return room;
@@ -29,6 +33,12 @@ export function joinRoom(code: string, player: Player): Room | null {
 
 export function getRoom(code: string): Room | null {
     return rooms[code] || null;
+}
+
+export function setMovieQueue(code: string, movies: Movie[]): void {
+    const room = rooms[code];
+    if (!room) return;
+    room.movies = movies;
 }
 
 export function removePlayerFromRoom(code: string, playerId: string): void {

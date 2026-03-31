@@ -2,7 +2,14 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
-import { createRoom, joinRoom, getRoom, removePlayerFromRoom } from "./rooms";
+import {
+  createRoom,
+  joinRoom,
+  getRoom,
+  setMovieQueue,
+  removePlayerFromRoom,
+} from "./rooms";
+import { fetchMovieQueue } from "./tmdb";
 
 dotenv.config();
 
@@ -42,7 +49,7 @@ io.on("connection", (socket) => {
     socket.emit("room:created", { code: room.code });
   });
 
-  socket.on("room:join", (data: { code: string; name: string }) => {
+  socket.on("room:join", async (data: { code: string; name: string }) => {
     const room = joinRoom(data.code, { id: socket.id, name: data.name });
 
     if (!room) {
@@ -55,6 +62,15 @@ io.on("connection", (socket) => {
 
     io.to(data.code).emit("room:ready", {
       players: room.players.map((p) => p.name),
+    });
+
+    console.log(`Fetching movies for room ${data.code}...`);
+    const movies = await fetchMovieQueue();
+    setMovieQueue(data.code, movies);
+
+    console.log(`Movies ready for room ${data.code}. Starting game.`);
+    io.to(data.code).emit("game:start", {
+      firstMovie: movies[0],
     });
   });
 
