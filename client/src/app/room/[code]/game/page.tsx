@@ -9,6 +9,7 @@ interface Movie {
   id: number;
   title: string;
   poster_path: string;
+  year: string;
 }
 
 export default function GameScreen() {
@@ -22,6 +23,7 @@ export default function GameScreen() {
     id: Number(searchParams.get("firstMovieId")),
     title: searchParams.get("firstMovieTitle") || "",
     poster_path: searchParams.get("firstMoviePoster") || "",
+    year: searchParams.get("firstMovieYear") || "",
   });
 
   const [isWaiting, setIsWaiting] = useState(false);
@@ -56,10 +58,13 @@ export default function GameScreen() {
     ? `https://image.tmdb.org/t/p/w500${currentMovie.poster_path}`
     : null;
 
-  return (
-    <main className="min-h-screen bg-[#0D9488] flex flex-col items-center justify-center p-6 relative">
+  const imdbUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(currentMovie.title)}`;
+  const letterboxdUrl = `https://letterboxd.com/search/${encodeURIComponent(currentMovie.title)}/`;
 
-      {/* Toast notification */}
+  return (
+    <main className="min-h-screen bg-[#0D9488] flex flex-col items-center justify-center p-4 relative">
+
+      {/* Toast */}
       {toast && (
         <div
           className="
@@ -69,7 +74,7 @@ export default function GameScreen() {
             text-sm px-5 py-3
             rounded-xl border-[2px] border-[#FFE500]
             shadow-[4px_4px_0px_#FFE500]
-            z-50 whitespace-nowrap  
+            z-50 whitespace-nowrap
           "
         >
           {toast}
@@ -79,7 +84,7 @@ export default function GameScreen() {
       {/* Player name tag */}
       <div
         className="
-          mb-6
+          mb-5
           bg-[#FFE500]
           border-[2px] border-black
           rounded-lg px-4 py-1
@@ -90,129 +95,161 @@ export default function GameScreen() {
         {name}
       </div>
 
-      {/* Main card */}
-      <div
-        className="
-          relative
-          bg-[#FFFDF4]
-          border-[3px] border-black
-          shadow-[6px_6px_0px_#000000]
-          rounded-xl
-          p-4
-          w-full max-w-sm
-          flex flex-col items-center gap-4
-        "
-      >
-        {/* Waiting overlay */}
-        {isWaiting && (
-          <div
-            className="
-              absolute inset-0
-              bg-black/60
-              rounded-xl
-              flex flex-col items-center justify-center
-              z-10
-              gap-2
-            "
-          >
-            <div className="w-4 h-4 rounded-full bg-[#FFE500] animate-ping" />
-            <p className="font-[family-name:var(--font-mono)] text-white text-sm tracking-widest uppercase">
-              Waiting...
-            </p>
-          </div>
-        )}
+      {/* Card + buttons row */}
+      <div className="flex items-center gap-4 w-full max-w-xs">
 
-        {/* Movie poster */}
+        {/* X button — just the icon */}
+        <button
+          onClick={handleSkip}
+          disabled={isWaiting}
+          className="
+            shrink-0
+            disabled:opacity-30
+            active:scale-90
+            transition-transform duration-75
+          "
+        >
+          <Image
+            src="/icons/icon-skip.svg"
+            alt="Skip"
+            width={52}
+            height={52}
+          />
+        </button>
+
+        {/* Card */}
         <div
           className="
-            w-full aspect-[2/3]
-            bg-black
-            border-[2px] border-black
-            rounded-lg
-            overflow-hidden
+            flex-1
             relative
+            bg-[#FFFDF4]
+            border-[3px] border-black
+            shadow-[5px_5px_0px_#000000]
+            rounded-xl
+            overflow-hidden
+            flex flex-col
           "
         >
-          {posterUrl ? (
-            <Image
-              src={posterUrl}
-              alt={currentMovie.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 384px) 100vw, 384px"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-white font-[family-name:var(--font-heading)] text-lg uppercase">
-                No Poster
-              </span>
+          {/* Waiting overlay */}
+          {isWaiting && (
+            <div
+              className="
+                absolute inset-0
+                bg-black/50
+                rounded-xl
+                flex flex-col items-center justify-center
+                z-10 gap-2
+              "
+            >
+              <div className="w-4 h-4 rounded-full bg-[#FFE500] animate-ping" />
+              <p className="font-[family-name:var(--font-mono)] text-white text-xs tracking-widest uppercase">
+                Waiting...
+              </p>
             </div>
           )}
+
+          {/* Poster */}
+          <div className="relative w-full aspect-[2/3] bg-black">
+            {posterUrl ? (
+              <Image
+                src={posterUrl}
+                alt={currentMovie.title}
+                fill
+                className="object-cover"
+                sizes="240px"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-white font-[family-name:var(--font-heading)] text-sm uppercase">
+                  No Poster
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Info section */}
+          <div className="flex flex-col items-center gap-2 px-3 py-3">
+
+            <h2
+              className="
+                font-[family-name:var(--font-heading)]
+                text-base text-black text-center uppercase leading-tight
+              "
+            >
+              {currentMovie.title}
+            </h2>
+
+            {currentMovie.year && (
+              <span className="font-[family-name:var(--font-mono)] text-xs text-black/50">
+                {currentMovie.year}
+              </span>
+            )}
+
+            {/* IMDB + Letterboxd */}
+            <div className="flex gap-2 mt-1 w-full">
+              <a
+                href={imdbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  flex-1 text-center
+                  bg-[#FFE500]
+                  border-[2px] border-black
+                  shadow-[3px_3px_0px_#000000]
+                  rounded-lg py-1
+                  font-[family-name:var(--font-heading)]
+                  text-xs text-black uppercase tracking-wide
+                  active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+                  transition-all duration-75
+                "
+              >
+                IMDB
+              </a>
+              <a
+                href={letterboxdUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  flex-1 text-center
+                  bg-[#FFFDF4]
+                  border-[2px] border-black
+                  shadow-[3px_3px_0px_#000000]
+                  rounded-lg py-1
+                  font-[family-name:var(--font-heading)]
+                  text-xs text-black uppercase tracking-wide
+                  active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+                  transition-all duration-75
+                "
+              >
+                Letterboxd
+              </a>
+            </div>
+
+          </div>
         </div>
 
-        {/* Movie Title */}
-        <h2
+        {/* Check button — just the icon */}
+        <button
+          onClick={handleCheck}
+          disabled={isWaiting}
           className="
-            font-[family-name:var(--font-heading)]
-            text-xl text-black text-center uppercase leading-tight
+            shrink-0
+            disabled:opacity-30
+            active:scale-90
+            transition-transform duration-75
           "
         >
-          {currentMovie.title}
-        </h2>
+          <Image
+            src="/icons/icon-check.svg"
+            alt="Check"
+            width={52}
+            height={52}
+          />
+        </button>
 
-        {/* X and Check buttons */}
-        <div className="flex items-center justify-between w-full px-4 pb-2">
-
-          {/* X button */}
-          <button
-            onClick={handleSkip}
-            disabled={isWaiting}
-            className="
-              w-16 h-16 rounded-full
-              bg-black
-              border-[3px] border-black
-              shadow-[4px_4px_0px_#FF3CAC]
-              flex items-center justify-center
-              active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
-              transition-all duration-75
-              disabled:opacity-40 disabled:cursor-not-allowed
-            "
-          >
-            <Image
-              src="/icons/icon-skip.png"
-              alt="Skip"
-              width={28}
-              height={28}
-            />
-          </button>
-
-          {/* Check button */}
-          <button
-            onClick={handleCheck}
-            disabled={isWaiting}
-            className="
-              w-16 h-16 rounded-full
-              bg-[#0EA5E9]
-              border-[3px] border-black
-              shadow-[4px_4px_0px_#FFE500]
-              flex items-center justify-center
-              active:translate-x-[3px] active:translate-y-[3px] active: shadow-none
-              transition-all duration-75
-              disabled:opacity-40 disabled:cursor-not-allowed
-            "
-          >
-            <Image
-              src="/icons/icon-check.png"
-              alt="Check"
-              width={28}
-              height={28}
-            />
-          </button>
-
-        </div>
       </div>
 
-      <div className="flex gap-2 mt-8">
+      <div className="flex gap-2 mt-6">
         <div className="w-8 h-2 rounded-full bg-[#FFE500] border border-black" />
         <div className="w-4 h-2 rounded-full bg-white border border-black" />
         <div className="w-8 h-2 rounded-full bg-[#FF3CAC] border border-black" />

@@ -26,9 +26,9 @@ export default function WaitingRoom() {
       setStatusText("Both players in! Loading movies...");
     });
 
-    socket.on("game:start", ({ firstMovie }: { firstMovie: { id: number, title: string; poster_path: string } }) => {
+    socket.on("game:start", ({ firstMovie }: { firstMovie: { id: number, title: string; poster_path: string; release_date: string } }) => {
       router.push(
-      `/room/${code}/game?name=${encodeURIComponent(name)}&firstMovieId=${firstMovie.id}&firstMovieTitle=${encodeURIComponent(firstMovie.title)}&firstMoviePoster=${encodeURIComponent(firstMovie.poster_path)}`
+        `/room/${code}/game?name=${encodeURIComponent(name)}&firstMovieId=${firstMovie.id}&firstMovieTitle=${encodeURIComponent(firstMovie.title)}&firstMoviePoster=${encodeURIComponent(firstMovie.poster_path)}&firstMovieYear=${firstMovie.release_date.split("-")[0]}`
       );
     });
 
