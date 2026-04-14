@@ -11,6 +11,13 @@ import {
   removePlayerFromRoom,
 } from "./rooms";
 import { fetchMovieQueue, enrichMovieDetails } from "./tmdb";
+import {
+  initPlayerChoices,
+  processCheck,
+  processSkip,
+  cleanupPlayer,
+  setMovieState,
+} from "./gameLogic";
 
 dotenv.config();
 
@@ -23,7 +30,7 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"],
     credentials: true,
   },
-  transports: ["websocket"],
+  transports: ["websocket"]
 });
 
 app.use(express.json());
@@ -31,6 +38,19 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+async function getEnrichedMovie(code: string, index: number) {
+  const room = getRoom(code);
+  if (!room || !room.movies[index]) return null;
+
+  let movie = room.movies[index];
+  if (!movie.details_fetched) {
+    console.log(`Enriching: ${movie.title}`);
+    movie = await enrichMovieDetails(movie);
+    updateMovieInQueue(code, index, movie);
+  }
+  return movie;
+}
 
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
@@ -44,6 +64,7 @@ io.on("connection", (socket) => {
     const player = { id: socket.id, name: data.name };
     const room = createRoom(data.code, player);
     socket.join(data.code);
+    initPlayerChoices(socket.id);
     console.log(`Room created: ${room.code} by ${player.name}`);
     socket.emit("room:created", { code: room.code });
   });
@@ -55,6 +76,7 @@ io.on("connection", (socket) => {
       return;
     }
     socket.join(data.code);
+    initPlayerChoices(socket.id);
     console.log(`${data.name} joined room ${data.code}`);
 
     io.to(data.code).emit("room:ready", {
@@ -76,20 +98,76 @@ io.on("connection", (socket) => {
     const player = room.players.find((p) => p.id === socket.id);
     if (!player) return;
 
-    let movie = room.movies[player.movieIndex];
+    const movie = await getEnrichedMovie(code, player.movieIndex);
     if (!movie) return;
-
-    if (!movie.details_fetched) {
-      console.log(`Enriching movie details for: ${movie.title}`);
-      movie = await enrichMovieDetails(movie);
-      updateMovieInQueue(code, player.movieIndex, movie);
-    }
 
     socket.emit("movie:show", { movie });
   });
 
+  socket.on("movie:skip", async ({ code, movieId }: { code: string; movieId: number }) => {
+    const room = getRoom(code);
+    if (!room) return;
+
+    const player = room.players.find((p) => p.id === socket.id);
+    if (!player) return;
+
+    const { waitingPlayerId } = processSkip(room, socket.id, movieId);
+
+    if (waitingPlayerId) {
+      io.to(waitingPlayerId).emit("match:missed");
+    }
+
+    player.movieIndex += 1;
+
+    if (player.movieIndex >= room.movies.length) {
+      console.log(`Fetching more movies for room ${code}...`);
+      const moreMovies = await fetchMovieQueue();
+      moreMovies.forEach((m) => room.movies.push(m));
+    }
+
+    const nextMovie = await getEnrichedMovie(code, player.movieIndex);
+    if (!nextMovie) return;
+
+    socket.emit("movie:show", { movie: nextMovie });
+  });
+
+  socket.on("movie:check", async ({ code, movieId }: { code: string; movieId: number }) => {
+    const room = getRoom(code);
+    if (!room) return;
+
+    const player = room.players.find((p) => p.id === socket.id);
+    if (!player) return;
+
+    const result = processCheck(room, socket.id, movieId);
+
+    if (result.outcome === "match") {
+      const movie = room.movies.find((m) => m.id === movieId);
+      io.to(code).emit("match:found", { movie });
+      return;
+    }
+
+    if (result.outcome === "missed") {
+      socket.emit("match:missed");
+      player.movieIndex += 1;
+      const nextMovie = await getEnrichedMovie(code, player.movieIndex);
+      if (nextMovie) socket.emit("movie:show", { movie: nextMovie });
+      return;
+    }
+
+    // outcome === "waiting" - do nothing, hold state until other player acts
+  });
+
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
+    cleanupPlayer(socket.id);
+
+    const allRoomCodes = Object.keys(
+      (io.sockets.adapter.rooms as Map<string, Set<string>>)
+    );
+
+    allRoomCodes.forEach((code) => {
+      removePlayerFromRoom(code, socket.id);
+    });
   });
 });
 
