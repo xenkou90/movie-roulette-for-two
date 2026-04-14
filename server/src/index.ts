@@ -115,6 +115,15 @@ io.on("connection", (socket) => {
 
     if (waitingPlayerId) {
       io.to(waitingPlayerId).emit("match:missed");
+
+      const waitingPlayer = room.players.find((p) => p.id === waitingPlayerId);
+      if (waitingPlayer) {
+        waitingPlayer.movieIndex += 1;
+        const nextMovieForWaiter = await getEnrichedMovie(code, waitingPlayer.movieIndex);
+        if (nextMovieForWaiter) {
+          io.to(waitingPlayer.id).emit("movie:show", { movie: nextMovieForWaiter });
+        }
+      }
     }
 
     player.movieIndex += 1;
