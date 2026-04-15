@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import socket from "@/lib/socket";
 
@@ -34,6 +34,7 @@ export default function GameScreen() {
   const searchParams = useSearchParams();
   const code = params.code as string;
   const name = searchParams.get("name") || "Player";
+  const router = useRouter();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);
@@ -54,9 +55,16 @@ export default function GameScreen() {
 
     socket.emit("game:ready", { code });
 
+    socket.on("match:found", ({ movie }: { movie: Movie }) => {
+      router.push(
+        `/room/${code}/match?name=${encodeURIComponent(name)}&movieId=${movie.id}&movieTitle=${encodeURIComponent(movie.title)}&moviePoster=${encodeURIComponent(movie.poster_path)}&movieYear=${movie.release_date.split("-")[0]}&imdbId=${movie.imdb_id ?? ""}`
+      );
+    });
+
     return () => {
       socket.off("movie:show");
       socket.off("match:missed");
+      socket.off("match:found");
     };
   }, [code]);
 
