@@ -134,9 +134,15 @@ export default function GameScreen() {
         <button
           onClick={handleSkip}
           disabled={isWaiting || !movie}
-          className="shrink-0 disabled:opacity-30 active:scale-90 transition-transform duration-75"
+          className="
+            shrink-0
+            shadow-[4px_4px_0px_#0EA5E9]
+            active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
+            transition-all duration-75
+            disabled:opacity-30 disabled:cursor-not-allowed
+          "
         >
-          <Image src="/icons/icon-skip.svg" alt="Skip" width={60} height={60} />
+          <Image src="/icons/icon-skip.png" alt="Skip" width={52} height={52} />
         </button>
 
         {/* Card */}
@@ -245,9 +251,15 @@ export default function GameScreen() {
         <button
           onClick={handleCheck}
           disabled={isWaiting || !movie}
-          className="shrink-0 disabled:opacity-30 active:scale-90 transition-transform duration-75"
+          className="
+            shrink-0
+            shadow-[4px_4px_0px_#FF3CAC]
+            active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
+            transition-all duration-75
+            disabled:opacity-30 disabled:cursor-not-allowed
+          "
         >
-          <Image src="/icons/icon-check.svg" alt="Check" width={60} height={60} />
+          <Image src="/icons/icon-check.png" alt="Check" width={52} height={52} />
         </button>
 
       </div>
