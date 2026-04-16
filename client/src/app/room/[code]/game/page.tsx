@@ -61,10 +61,15 @@ export default function GameScreen() {
       );
     });
 
+    socket.on("room:playerLeft", () => {
+      showToast("Your partner left the room.");
+    });
+
     return () => {
       socket.off("movie:show");
       socket.off("match:missed");
       socket.off("match:found");
+      socket.off("room:playerLeft");
     };
   }, [code]);
 

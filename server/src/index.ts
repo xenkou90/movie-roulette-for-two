@@ -170,13 +170,19 @@ io.on("connection", (socket) => {
     console.log(`Client disconnected: ${socket.id}`);
     cleanupPlayer(socket.id);
 
-    const allRoomCodes = Object.keys(
-      (io.sockets.adapter.rooms as Map<string, Set<string>>)
-    );
+    const roomCodes = Array.from(io.sockets.adapter.rooms.keys());
 
-    allRoomCodes.forEach((code) => {
+    for (const code of roomCodes) {
+      const room = getRoom(code);
+      if (!room) continue;
+
+      const wasInRoom = room.players.some((p) => p.id === socket.id);
+      if (!wasInRoom) continue;
+
       removePlayerFromRoom(code, socket.id);
-    });
+      io.to(code).emit("room:playerLeft");
+      break;
+    }
   });
 });
 
