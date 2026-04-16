@@ -36,7 +36,7 @@ export default function MatchScreen() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#FF3CAC] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <main className="full-height bg-[#FF3CAC] flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
       {/* Background decoratvie blobs */}
       <div className="absolute top-[-60px] left-[-60px] w-48 h-48 rounded-full bg-[#FFE500] border-[3px] border-black opacity-60" />

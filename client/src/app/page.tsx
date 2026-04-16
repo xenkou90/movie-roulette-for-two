@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <main
       className="
-        min-h-screen
+        full-height
         bg-[#0D9488]
         flex flex-col items-center justify-center
         p-6

@@ -37,7 +37,7 @@ export default function WaitingRoom() {
   }, [code, name, router]);
 
 return (
-    <main className="min-h-screen bg-[#0D9488] flex flex-col items-center justify-center p-6">
+    <main className="full-height bg-[#0D9488] flex flex-col items-center justify-center p-6">
 
       <div className="flex gap-2 mb-8">
         <div className="w-3 h-3 rounded-full bg-[#FF3CAC] border-2 border-black" />

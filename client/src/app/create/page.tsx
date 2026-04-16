@@ -35,7 +35,7 @@ export default function CreateRoom() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0D9488] flex flex-col items-center justify-center p-6">
+    <main className="full-height bg-[#0D9488] flex flex-col items-center justify-center p-6">
       <div
         className="
           bg-[#FFFDF4]

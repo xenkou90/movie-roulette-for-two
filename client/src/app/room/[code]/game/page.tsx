@@ -100,7 +100,7 @@ export default function GameScreen() {
   const letterboxdUrl = `https://letterboxd.com/tmdb/${movie?.id ?? ""}/`;
 
   return (
-    <main className="min-h-screen bg-[#0D9488] flex flex-col items-center justify-center p-4 relative">
+    <main className="full-height bg-[#0D9488] flex flex-col items-center justify-center p-4 relative">
 
       {/* Toast */}
       {toast && (
