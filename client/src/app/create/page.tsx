@@ -14,7 +14,7 @@ export default function CreateRoom() {
     socket.connect();
 
     socket.on("room:created", ({ code }: { code: string }) => {
-      router.push(`/room/${code}/wait?name=${encodeURIComponent(name)}&host=true`);
+      router.replace(`/room/${code}/wait?name=${encodeURIComponent(name)}&host=true`);
     });
 
     socket.on("room:error", ({ message }: { message: string }) => {

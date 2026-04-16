@@ -14,7 +14,7 @@ export default function JoinRoom() {
     socket.connect();
 
     socket.on("room:ready", ({ players }: { players: string[] }) => {
-      router.push(`/room/${code}/wait?name=${encodeURIComponent(name)}&host=false`);
+      router.replace(`/room/${code}/wait?name=${encodeURIComponent(name)}&host=false`);
     });
 
     socket.on("room:error", ({ message }: { message: string }) => {

@@ -27,7 +27,7 @@ export default function WaitingRoom() {
     });
 
     socket.on("game:start", () => {
-      router.push(`/room/${code}/game?name=${encodeURIComponent(name)}`);
+      router.replace(`/room/${code}/game?name=${encodeURIComponent(name)}`);
     });
 
     return () => {
