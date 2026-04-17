@@ -163,13 +163,23 @@ io.on("connection", (socket) => {
       return;
     }
 
-  socket.on("room:leave", ({ code }: { code: string }) => {
+  socket.on("room:leave", ({ code }: { code: string }, callback?: () => void) => {
     const room = getRoom(code);
-    if (!room) return;
+    if (!room) {
+      console.log(`Player ${socket.id} tried to leave room ${code} but it no longer exists.`);
+      callback?.();
+      return;
+    }
+    const wasInRoom = room.players.some((p) => p.id === socket.id);
+    if (!wasInRoom) {
+      callback?.();
+      return;
+    }
     removePlayerFromRoom(code, socket.id);
     cleanupPlayer(socket.id);
     socket.leave(code);
     console.log(`Player ${socket.id} left room ${code}`);
+    callback?.();
   });
 
     // outcome === "waiting" - do nothing, hold state until other player acts

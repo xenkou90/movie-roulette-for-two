@@ -2,7 +2,7 @@
 
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import socket from "@/lib/socket";
 
 export default function MatchScreen() {
@@ -31,9 +31,15 @@ export default function MatchScreen() {
 
   const [show, setShow] = useState(false);
 
+  const hasLeft = useRef(false);
+
   useEffect(() => {
     const t = setTimeout(() => setShow(true), 100);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    socket.connect();
   }, []);
 
   return (
@@ -154,8 +160,11 @@ export default function MatchScreen() {
       {/* Play Again */}
       <button
         onClick={() => {
-          socket.emit("room:leave", { code });
+          if (hasLeft.current) return;
+          hasLeft.current = true;
+          socket.emit("room:leave", { code }, () => {
           router.replace("/");
+          });
         }}
         className={`
           mt-6 w-full max-w-sm
