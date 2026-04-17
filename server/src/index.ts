@@ -16,7 +16,6 @@ import {
   processCheck,
   processSkip,
   cleanupPlayer,
-  setMovieState,
 } from "./gameLogic";
 
 dotenv.config();
@@ -30,7 +29,7 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"],
     credentials: true,
   },
-  transports: ["websocket"]
+  transports: ["websocket"],
 });
 
 app.use(express.json());
@@ -39,16 +38,27 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+const enrichingInProgress = new Set<number>();
+
 async function getEnrichedMovie(code: string, index: number) {
   const room = getRoom(code);
   if (!room || !room.movies[index]) return null;
 
   let movie = room.movies[index];
-  if (!movie.details_fetched) {
-    console.log(`Enriching: ${movie.title}`);
-    movie = await enrichMovieDetails(movie);
-    updateMovieInQueue(code, index, movie);
+
+  if (movie.details_fetched) return movie;
+
+  if (enrichingInProgress.has(movie.id)) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return getRoom(code)?.movies[index] || movie;
   }
+
+  enrichingInProgress.add(movie.id);
+  console.log(`Enriching: ${movie.title}`);
+  movie = await enrichMovieDetails(movie);
+  updateMovieInQueue(code, index, movie);
+  enrichingInProgress.delete(movie.id);
+
   return movie;
 }
 
@@ -163,6 +173,9 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // outcome === "waiting" — do nothing, hold state until other player acts
+  });
+
   socket.on("room:leave", ({ code }: { code: string }, callback?: () => void) => {
     const room = getRoom(code);
     if (!room) {
@@ -180,9 +193,6 @@ io.on("connection", (socket) => {
     socket.leave(code);
     console.log(`Player ${socket.id} left room ${code}`);
     callback?.();
-  });
-
-    // outcome === "waiting" - do nothing, hold state until other player acts
   });
 
   socket.on("disconnect", () => {
