@@ -3,6 +3,7 @@
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import socket from "@/lib/socket";
 
 export default function MatchScreen() {
   const params = useParams();
@@ -152,7 +153,10 @@ export default function MatchScreen() {
 
       {/* Play Again */}
       <button
-        onClick={() => router.push("/")}
+        onClick={() => {
+          socket.emit("room:leave", { code });
+          router.replace("/");
+        }}
         className={`
           mt-6 w-full max-w-sm
           bg-black

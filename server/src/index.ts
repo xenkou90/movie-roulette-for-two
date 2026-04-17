@@ -163,6 +163,15 @@ io.on("connection", (socket) => {
       return;
     }
 
+  socket.on("room:leave", ({ code }: { code: string }) => {
+    const room = getRoom(code);
+    if (!room) return;
+    removePlayerFromRoom(code, socket.id);
+    cleanupPlayer(socket.id);
+    socket.leave(code);
+    console.log(`Player ${socket.id} left room ${code}`);
+  });
+
     // outcome === "waiting" - do nothing, hold state until other player acts
   });
 
