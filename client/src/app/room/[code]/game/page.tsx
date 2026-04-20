@@ -53,10 +53,8 @@ export default function GameScreen() {
       setIsWaiting(false);
     });
 
-    socket.emit("game:ready", { code });
-
     socket.on("match:found", ({ movie }: { movie: Movie }) => {
-      router.push(
+      router.replace(
         `/room/${code}/match?name=${encodeURIComponent(name)}&movieId=${movie.id}&movieTitle=${encodeURIComponent(movie.title)}&moviePoster=${encodeURIComponent(movie.poster_path)}&movieYear=${movie.release_date.split("-")[0]}&imdbId=${movie.imdb_id ?? ""}`
       );
     });
@@ -71,7 +69,7 @@ export default function GameScreen() {
       socket.off("match:found");
       socket.off("room:playerLeft");
     };
-  }, [code]);
+  }, [code, name, router]);
 
   function showToast(message: string) {
     setToast(message);
