@@ -16,7 +16,6 @@ export default function MatchScreen() {
   const moviePoster = searchParams.get("moviePoster") || "";
   const movieYear = searchParams.get("movieYear") || "";
   const imdbId = searchParams.get("imdbId") || "";
-
   const movieId = searchParams.get("movieId") || "";
 
   const posterUrl = moviePoster
@@ -30,22 +29,18 @@ export default function MatchScreen() {
   const letterboxdUrl = `https://letterboxd.com/tmdb/${movieId}/`;
 
   const [show, setShow] = useState(false);
-
   const hasLeft = useRef(false);
 
   useEffect(() => {
+    socket.connect();
     const t = setTimeout(() => setShow(true), 100);
     return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    socket.connect();
   }, []);
 
   return (
     <main className="full-height bg-[#FF3CAC] flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
-      {/* Background decoratvie blobs */}
+      {/* Background blobs */}
       <div className="absolute top-[-60px] left-[-60px] w-48 h-48 rounded-full bg-[#FFE500] border-[3px] border-black opacity-60" />
       <div className="absolute bottom-[-40px] right-[-40px] w-36 h-36 rounded-full bg-[#0D9488] border-[3px] border-black opacity-60" />
       <div className="absolute top-1/2 right-[-30px] w-24 h-24 rounded-full bg-[#FFFDF4] border-[3px] border-black opacity-40" />
@@ -54,7 +49,7 @@ export default function MatchScreen() {
       <div
         className={`
           mb-5 transition-all duration-500
-          ${show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
+          ${show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}  
         `}
       >
         <div
@@ -67,7 +62,7 @@ export default function MatchScreen() {
             text-2xl uppercase tracking-wide text-black
           "
         >
-          🎬 It's a match!
+          🎬 It's a Match!
         </div>
       </div>
 
@@ -80,43 +75,35 @@ export default function MatchScreen() {
           shadow-[6px_6px_0px_#000000]
           rounded-xl overflow-hidden
           transition-all duration-700 delay-100
-          ${show ? "opacity-100 scale-100" : "opacity-0 scale-95"}
+          ${show ? "opacity-100 scale-100" : "opacity-0 scale-95"}  
         `}
       >
         {/* Poster */}
         {posterUrl && (
-          <div className="bg-white p-4 pb-3">
-            <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-black/10">
-              <Image
-                src={posterUrl}
-                alt={movieTitle}
-                fill
-                className="object-cover"
-                sizes="(max-width: 384px) 80vw, 320px"
-              />
-            </div>
+          <div className="relative w-full aspect-[2/3]">
+            <Image
+              src={posterUrl}
+              alt={movieTitle}
+              fill
+              className="object-cover"
+              sizes="(max-width: 384px) 100vw, 384px"
+            />
           </div>
         )}
 
-        {/* Info */}
-        <div className="px-5 py-4 flex flex-col items-center gap-2">
+        {/* Title + Year + Buttons */}
+        <div className="px-5 py-4 flex flex-col items-center gap-3">
+
           <h2
             className="
               font-[family-name:var(--font-heading)]
-              text-xl text-black text-center uppercase leading-tight
+              text-lg text-black text-center uppercase leading-tight
             "
           >
-            {movieTitle}
+            {movieTitle}{movieYear ? ` (${movieYear})` : ""}
           </h2>
 
-          {movieYear && (
-            <span className="font-[family-name:var(--font-mono)] text-xs text-black/50">
-              {movieYear}
-            </span>
-          )}
-
-          {/* IMDB + Letterboxd */}
-          <div className="flex gap-3 w-full mt-2">
+          <div className="flex gap-3 w-full">
             <a
               href={imdbUrl}
               target="_blank"
@@ -125,6 +112,7 @@ export default function MatchScreen() {
                 flex-1 text-center
                 bg-[#FFE500]
                 border-[3px] border-black
+                shadow-[4px_4px_0px_#000000]
                 rounded-xl py-3
                 font-[family-name:var(--font-heading)]
                 text-sm text-black uppercase tracking-wide
@@ -141,12 +129,12 @@ export default function MatchScreen() {
               rel="noopener noreferrer"
               className="
                 flex-1 text-center
-                bg-[#FFFDF4]
+                bg-[#FF8000]
                 border-[3px] border-black
                 shadow-[4px_4px_0px_#000000]
                 rounded-xl py-3
                 font-[family-name:var(--font-heading)]
-                text-sm text-black uppercase tracking-wide
+                text-sm text-white uppercase tracking-wide
                 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
                 transition-all duration-75
               "
@@ -163,11 +151,11 @@ export default function MatchScreen() {
           if (hasLeft.current) return;
           hasLeft.current = true;
           socket.emit("room:leave", { code }, () => {
-          router.replace("/");
+            router.replace("/");
           });
         }}
         className={`
-          mt-6 w-full max-w-sm
+          mt-5 w-full max-w-sm
           bg-black
           border-[3px] border-black
           shadow-[5px_5px_0px_#FFE500]
@@ -176,13 +164,13 @@ export default function MatchScreen() {
           text-xl text-white uppercase tracking-wide
           active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
           transition-all duration-75
-          ${show ? "opacity-100" : "opacity-0"}
+          ${show ? "opacity-100" : "opacity-0"}  
         `}
       >
         Play Again
       </button>
 
-      <div className="flex gap-2 mt-6">
+      <div className="flex gap-2 mt-5">
         <div className="w-8 h-2 rounded-full bg-[#FFE500] border border-black" />
         <div className="w-4 h-2 rounded-full bg-white border border-black" />
         <div className="w-8 h-2 rounded-full bg-[#0D9488] border border-black" />
