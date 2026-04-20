@@ -183,7 +183,7 @@ export default function GameScreen() {
           {movie ? (
             <>
               {/* Poster — centered in white padded area */}
-              <div className="bg-white p-4 pb-3">
+              <div className="bg-white p-4 pb-0">
                 <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-black/10">
                   {posterUrl ? (
                     <Image
@@ -204,7 +204,7 @@ export default function GameScreen() {
               </div>
 
               {/* Info */}
-              <div className="px-4 py-3 flex flex-col gap-2">
+              <div className="px-4 py-2 flex flex-col gap-2">
 
                 {/* Title */}
                 <h2
@@ -222,7 +222,7 @@ export default function GameScreen() {
                     className="
                       font-[family-name:var(--font-mono)]
                       text-[10px] text-black/60
-                      text-center leading-relaxed line-clamp-3
+                      text-center leading-relaxed line-clamp-5
                     "
                   >
                     {movie.overview}
