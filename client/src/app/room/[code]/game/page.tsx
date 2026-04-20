@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import socket from "@/lib/socket";
@@ -40,8 +40,15 @@ export default function GameScreen() {
   const [isWaiting, setIsWaiting] = useState(false);
   const [toast, setToast] = useState("");
 
+  const gameReadySent = useRef(false);
+
   useEffect(() => {
     socket.connect();
+
+    if (!gameReadySent.current) {
+      gameReadySent.current = true;
+      socket.emit("game:ready", { code });
+    }
 
     socket.on("movie:show", ({ movie }: { movie: Movie }) => {
       setMovie(movie);
@@ -145,7 +152,7 @@ export default function GameScreen() {
             disabled:opacity-30 disabled:cursor-not-allowed
           "
         >
-          <Image src="/icons/icon-skip.png" alt="Skip" width={52} height={52} />
+          <Image src="/icons/icon-skip.png" alt="Skip" width={52} height={52} loading="eager" />
         </button>
 
         {/* Card */}
