@@ -47,6 +47,19 @@ export default function CreateRoom() {
           flex flex-col gap-5
           "
         >
+          <button
+            onClick={() => router.replace("/")}
+            className="
+              self-start
+              font-[family-name:var(--font-mono)]
+              text-xs uppercase tracking-widest
+              text-black/50 hover:text-black
+              transition-colors duration-150  
+            "
+          >
+            ← Back
+          </button>
+
           <h2 className="font-[family-name:var(--font-heading)] text-3xl uppercase text-black text-center">
             Create a Room
           </h2>
