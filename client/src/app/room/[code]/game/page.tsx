@@ -36,6 +36,7 @@ export default function GameScreen() {
   const name = searchParams.get("name") || "Player";
   const router = useRouter();
 
+  const [partnerLeft, setPartnerLeft] = useState(false);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);
   const [toast, setToast] = useState("");
@@ -68,6 +69,12 @@ export default function GameScreen() {
 
     socket.on("room:playerLeft", () => {
       showToast("Your partner left the room.");
+      setTimeout(() => {
+        setPartnerLeft(true);
+        setTimeout(() => {
+          router.replace("/");
+        }, 3000);
+      }, 3000);
     });
 
     return () => {
@@ -121,6 +128,62 @@ export default function GameScreen() {
           "
         >
           {toast}
+        </div>
+      )}
+
+      {/* Partner left overlay */}
+      {partnerLeft && (
+        <div
+          className="
+            absolute inset-0
+            bg-black/70
+            backdrop-blur-sm
+            flex items-center justify-center
+            z-50
+            rounded-none
+            p-6
+          "
+        >
+          <div
+            className="
+              bg-[#FFFDF4]
+              border-[3px] border-black
+              shadow-[6px_6px_0px_#000000]
+              rounded-xl
+              px-6 py-8
+              w-full max-w-xs
+              flex flex-col items-center gap-4
+              text-center
+            "
+          >
+            <div
+              className="
+                bg-[#FFE500]
+                border-[2px] border-black
+                rounded-lg px-3 py-1
+                font-[family-name:var(--font-heading)]
+                text-sm uppercase tracking-wide text-black
+              "
+            >
+              Game Over
+            </div>
+
+            <p
+              className="
+                font-[family-name:var(--font-mono)]
+                text-sm text-black/80
+                leading-relaxed
+              "
+            >
+              Returning home — create or join a room to continue.
+            </p>
+
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
         </div>
       )}
 
