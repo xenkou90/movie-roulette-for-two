@@ -56,3 +56,7 @@ export function removePlayerFromRoom(code: string, playerId: string): void {
     delete rooms[code];
   }
 }
+
+export function deleteRoom(code: string): void {
+  delete rooms[code];
+}

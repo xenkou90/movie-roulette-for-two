@@ -9,6 +9,7 @@ import {
   setMovieQueue,
   updateMovieInQueue,
   removePlayerFromRoom,
+  deleteRoom,
 } from "./rooms";
 import { fetchMovieQueue, enrichMovieDetails } from "./tmdb";
 import {
@@ -208,8 +209,19 @@ io.on("connection", (socket) => {
       const wasInRoom = room.players.some((p) => p.id === socket.id);
       if (!wasInRoom) continue;
 
-      removePlayerFromRoom(code, socket.id);
+      // Notify the remaining player before deleting
       io.to(code).emit("room:playerLeft");
+
+      // Clean up all remaining players choices
+      for (const player of room.players) {
+        if (player.id !== socket.id) {
+          cleanupPlayer(player.id);
+        }
+      }
+
+      // Delete the room entirely
+      deleteRoom(code);
+      console.log(`Room ${code} deleted after player ${socket.id} disconnected`);
       break;
     }
   });
