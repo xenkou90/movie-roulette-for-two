@@ -12,11 +12,7 @@ export function initPlayerChoices(socketId: string): void {
     playerChoices[socketId] = {};
 }
 
-export function getPlayerChoices(socketId: string): PlayerChoices {
-    return playerChoices[socketId] || {};
-}
-
-export function setMovieState(
+function setMovieState(
     socketId: string,
     movieId: number,
     state: MovieState
