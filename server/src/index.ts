@@ -21,6 +21,17 @@ import {
 
 dotenv.config();
 
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+
+const PORT = process.env.PORT || 3001;
+
+if (!TMDB_API_KEY) {
+  console.error("Missing required environment variable: TMDB_API_KEY");
+  process.exit(1);
+}
+
+const apiKey: string = TMDB_API_KEY;
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -56,7 +67,7 @@ async function getEnrichedMovie(code: string, index: number) {
 
   enrichingInProgress.add(movie.id);
   console.log(`Enriching: ${movie.title}`);
-  movie = await enrichMovieDetails(movie);
+  movie = await enrichMovieDetails(movie, apiKey);
   updateMovieInQueue(code, index, movie);
   enrichingInProgress.delete(movie.id);
 
@@ -95,7 +106,7 @@ io.on("connection", (socket) => {
     });
 
     console.log(`Fetching movies for room ${data.code}...`);
-    const movies = await fetchMovieQueue();
+    const movies = await fetchMovieQueue(apiKey);
     setMovieQueue(data.code, movies);
     console.log(`Movies ready for room ${data.code}. Starting game.`);
 
@@ -141,7 +152,7 @@ io.on("connection", (socket) => {
 
     if (player.movieIndex >= room.movies.length) {
       console.log(`Fetching more movies for room ${code}...`);
-      const moreMovies = await fetchMovieQueue();
+      const moreMovies = await fetchMovieQueue(apiKey);
       moreMovies.forEach((m) => room.movies.push(m));
     }
 
@@ -225,9 +236,4 @@ io.on("connection", (socket) => {
       break;
     }
   });
-});
-
-const PORT = process.env.PORT || 3001;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });

@@ -22,8 +22,7 @@ export interface Movie {
   details_fetched?: boolean;
 }
 
-export async function fetchMovieQueue(): Promise<Movie[]> {
-  const apiKey = process.env.TMDB_API_KEY;
+export async function fetchMovieQueue(apiKey: string): Promise<Movie[]> {
   const pages = [1, 2, 3];
 
   const requests = pages.map((page) =>
@@ -45,8 +44,7 @@ export async function fetchMovieQueue(): Promise<Movie[]> {
   return shuffle(movies);
 }
 
-export async function enrichMovieDetails(movie: Movie): Promise<Movie> {
-  const apiKey = process.env.TMDB_API_KEY;
+export async function enrichMovieDetails(movie: Movie, apiKey: string): Promise<Movie> {
   try {
     const res = await fetch(
       `${TMDB_BASE}/movie/${movie.id}?api_key=${apiKey}&append_to_response=external_ids`
