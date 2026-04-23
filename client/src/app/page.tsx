@@ -12,7 +12,7 @@ export default function Home() {
         bg-[#0D9488]
         flex flex-col items-center justify-center
         p-6
-        font-[family-name:var(--font-mono)]  
+        font-[family-name:var(--font-mono)]
       "
     >
       {/* Three decorative dots at the top */}

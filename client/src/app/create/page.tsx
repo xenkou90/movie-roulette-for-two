@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import socket from "@/lib/socket";
 
@@ -10,11 +10,16 @@ export default function CreateRoom() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
 
+  const nameRef = useRef(name);
+  useEffect(() => {
+    nameRef.current = name;
+  }, [name]);
+
   useEffect(() => {
     socket.connect();
 
     socket.on("room:created", ({ code }: { code: string }) => {
-      router.replace(`/room/${code}/wait?name=${encodeURIComponent(name)}&host=true`);
+      router.replace(`/room/${code}/wait?name=${encodeURIComponent(nameRef.current)}&host=true`);
     });
 
     socket.on("room:error", ({ message }: { message: string }) => {
@@ -25,7 +30,7 @@ export default function CreateRoom() {
       socket.off("room:created");
       socket.off("room:error");
     };
-  }, [name, router]);
+  }, [router]);
 
   function handleSubmit() {
     if (!name.trim()) { setError("Enter your name."); return; }
@@ -54,7 +59,7 @@ export default function CreateRoom() {
               font-[family-name:var(--font-mono)]
               text-xs uppercase tracking-widest
               text-black/50 hover:text-black
-              transition-colors duration-150  
+              transition-colors duration-150
             "
           >
             ← Back
@@ -68,7 +73,7 @@ export default function CreateRoom() {
             <label className="text-xs uppercase tracking-widest text-black/60 font-[family-name:var(--font-mono)]">
               Your Name
             </label>
-            <input 
+            <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
