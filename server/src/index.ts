@@ -237,3 +237,7 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+httpServer.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
