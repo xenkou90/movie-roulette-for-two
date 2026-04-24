@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import socket from "@/lib/socket";
 
@@ -10,11 +10,22 @@ export default function JoinRoom() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
 
+  const nameRef = useRef(name);
+  const codeRef = useRef(code);
+
+  useEffect(() => {
+    nameRef.current = name;
+  }, [name]);
+
+  useEffect(() => {
+    codeRef.current = code;
+  }, [code]);
+
   useEffect(() => {
     socket.connect();
 
-    socket.on("room:ready", ({ players }: { players: string[] }) => {
-      router.replace(`/room/${code}/wait?name=${encodeURIComponent(name)}&host=false`);
+    socket.on("room:ready", () => {
+      router.replace(`/room/${codeRef.current}/wait?name=${encodeURIComponent(nameRef.current)}&host=false`);
     });
 
     socket.on("room:error", ({ message }: { message: string }) => {
@@ -25,7 +36,7 @@ export default function JoinRoom() {
       socket.off("room:ready");
       socket.off("room:error");
     };
-  }, [code, name, router]);
+  }, [router]);
 
   function handleSubmit() {
     if (!name.trim()) { setError("Enter your name."); return; }
