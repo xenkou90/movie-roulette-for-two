@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import socket from "@/lib/socket";
 
@@ -18,16 +18,19 @@ export default function WaitingRoom() {
     isHost ? "Waiting for your friend..." : "Your friend is getting things ready..."
   );
 
+  const codeRef = useRef(code);
+  const nameRef = useRef(name);
+
   useEffect(() => {
     socket.connect();
 
-    socket.on("room:ready", ({ players }: { players: string[] }) => {
+    socket.on("room:ready", () => {
       setFriendJoined(true);
       setStatusText("Both players in! Loading movies...");
     });
 
     socket.on("game:start", () => {
-      router.replace(`/room/${code}/game?name=${encodeURIComponent(name)}`);
+      router.replace(`/room/${codeRef.current}/game?name=${encodeURIComponent(nameRef.current)}`);
     });
 
     return () => {
