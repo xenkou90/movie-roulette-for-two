@@ -32,23 +32,33 @@ function formatReleaseDate(dateStr: string): string {
 export default function GameScreen() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const code = params.code as string;
   const name = searchParams.get("name") || "Player";
-  const router = useRouter();
 
   const [partnerLeft, setPartnerLeft] = useState(false);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);
   const [toast, setToast] = useState("");
 
+  const codeRef = useRef(code);
+  const nameRef = useRef(name);
   const gameReadySent = useRef(false);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  function showToast(message: string) {
+    setToast(message);
+    const t = setTimeout(() => setToast(""), 3000);
+    timeoutsRef.current.push(t);
+  }
 
   useEffect(() => {
     socket.connect();
 
     if (!gameReadySent.current) {
       gameReadySent.current = true;
-      socket.emit("game:ready", { code });
+      socket.emit("game:ready", { code: codeRef.current });
     }
 
     socket.on("movie:show", ({ movie }: { movie: Movie }) => {
@@ -63,18 +73,20 @@ export default function GameScreen() {
 
     socket.on("match:found", ({ movie }: { movie: Movie }) => {
       router.replace(
-        `/room/${code}/match?name=${encodeURIComponent(name)}&movieId=${movie.id}&movieTitle=${encodeURIComponent(movie.title)}&moviePoster=${encodeURIComponent(movie.poster_path)}&movieYear=${movie.release_date.split("-")[0]}&imdbId=${movie.imdb_id ?? ""}`
+        `/room/${codeRef.current}/match?name=${encodeURIComponent(nameRef.current)}&movieId=${movie.id}&movieTitle=${encodeURIComponent(movie.title)}&moviePoster=${encodeURIComponent(movie.poster_path)}&movieYear=${movie.release_date.split("-")[0]}&imdbId=${movie.imdb_id ?? ""}`
       );
     });
 
     socket.on("room:playerLeft", () => {
       showToast("Your partner left the room.");
-      setTimeout(() => {
+      const overlayTimeout = setTimeout(() => {
         setPartnerLeft(true);
-        setTimeout(() => {
+        const redirectTimeout = setTimeout(() => {
           router.replace("/");
         }, 3000);
+        timeoutsRef.current.push(redirectTimeout);
       }, 3000);
+      timeoutsRef.current.push(overlayTimeout);
     });
 
     return () => {
@@ -82,13 +94,10 @@ export default function GameScreen() {
       socket.off("match:missed");
       socket.off("match:found");
       socket.off("room:playerLeft");
+      timeoutsRef.current.forEach((t: NodeJS.Timeout) => clearTimeout(t));
+      timeoutsRef.current = [];
     };
-  }, [code, name, router]);
-
-  function showToast(message: string) {
-    setToast(message);
-    setTimeout(() => setToast(""), 3000);
-  }
+  }, [router]);
 
   function handleSkip() {
     if (isWaiting || !movie) return;
@@ -100,6 +109,8 @@ export default function GameScreen() {
     setIsWaiting(true);
     socket.emit("movie:check", { code, movieId: movie.id });
   }
+
+  const buttonsDisabled = isWaiting || !movie;
 
   const posterUrl = movie?.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
@@ -206,7 +217,7 @@ export default function GameScreen() {
         {/* X button */}
         <button
           onClick={handleSkip}
-          disabled={isWaiting || !movie}
+          disabled={buttonsDisabled}
           className="
             shrink-0
             shadow-[4px_4px_0px_#0EA5E9]
@@ -323,7 +334,7 @@ export default function GameScreen() {
         {/* Check button */}
         <button
           onClick={handleCheck}
-          disabled={isWaiting || !movie}
+          disabled={buttonsDisabled}
           className="
             shrink-0
             shadow-[4px_4px_0px_#FF3CAC]
