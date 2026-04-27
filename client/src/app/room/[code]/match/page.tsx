@@ -11,7 +11,6 @@ export default function MatchScreen() {
   const router = useRouter();
 
   const code = params.code as string;
-  const name = searchParams.get("name") || "Player";
   const movieTitle = searchParams.get("movieTitle") || "";
   const moviePoster = searchParams.get("moviePoster") || "";
   const movieYear = searchParams.get("movieYear") || "";
@@ -49,7 +48,7 @@ export default function MatchScreen() {
       <div
         className={`
           mb-5 transition-all duration-500
-          ${show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}  
+          ${show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
         `}
       >
         <div
@@ -62,7 +61,7 @@ export default function MatchScreen() {
             text-2xl uppercase tracking-wide text-black
           "
         >
-          🎬 It's a Match!
+          🎬 It&apos;s a Match!
         </div>
       </div>
 
@@ -75,7 +74,7 @@ export default function MatchScreen() {
           shadow-[6px_6px_0px_#000000]
           rounded-xl overflow-hidden
           transition-all duration-700 delay-100
-          ${show ? "opacity-100 scale-100" : "opacity-0 scale-95"}  
+          ${show ? "opacity-100 scale-100" : "opacity-0 scale-95"}
         `}
       >
         {/* Poster */}
@@ -164,7 +163,7 @@ export default function MatchScreen() {
           text-xl text-white uppercase tracking-wide
           active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
           transition-all duration-75
-          ${show ? "opacity-100" : "opacity-0"}  
+          ${show ? "opacity-100" : "opacity-0"}
         `}
       >
         Play Again

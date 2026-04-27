@@ -369,7 +369,7 @@ export default function GameScreen() {
           >
             IMDB
           </a>
-          
+
           <a
             href={letterboxdUrl}
             target="_blank"
