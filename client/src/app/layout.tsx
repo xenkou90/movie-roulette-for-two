@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Space_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,8 +15,16 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Movie ROuletter for 2",
+  title: "Movie Roulette for 2",
   description: "Swipe. Match. Watch.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#0D9488"
 };
 
 export default function RootLayout({
