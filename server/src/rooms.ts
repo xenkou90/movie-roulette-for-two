@@ -10,6 +10,8 @@ export interface Room {
   code: string;
   players: Player[];
   movies: Movie[];
+  readyPlayerIds: Set<string>;
+  moviesReady: boolean;
 }
 
 const rooms: Record<string, Room> = {};
@@ -19,6 +21,8 @@ export function createRoom(code: string, player: Omit<Player, "movieIndex">): Ro
     code,
     players: [{ ...player, movieIndex: 0 }],
     movies: [],
+    readyPlayerIds: new Set<string>(),
+    moviesReady: false,
   };
   rooms[code] = room;
   return room;
@@ -59,4 +63,26 @@ export function removePlayerFromRoom(code: string, playerId: string): void {
 
 export function deleteRoom(code: string): void {
   delete rooms[code];
+}
+
+export function markPlayerReady(code: string, playerId: string): void {
+  const room = rooms[code];
+  if (!room) return;
+  room.readyPlayerIds.add(playerId);
+}
+
+export function markMoviesReady(code: string): void {
+  const room = rooms[code];
+  if (!room) return;
+  room.moviesReady = true;
+}
+
+export function canStartGame(code: string): boolean {
+  const room = rooms[code];
+  if (!room) return false;
+  return (
+    room.players.length === 2 &&
+    room.readyPlayerIds.size === 2 &&
+    room.moviesReady
+  );
 }

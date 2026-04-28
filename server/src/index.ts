@@ -10,6 +10,9 @@ import {
   updateMovieInQueue,
   removePlayerFromRoom,
   deleteRoom,
+  markPlayerReady,
+  markMoviesReady,
+  canStartGame,
 } from "./rooms";
 import { fetchMovieQueue, enrichMovieDetails } from "./tmdb";
 import {
@@ -108,9 +111,23 @@ io.on("connection", (socket) => {
     console.log(`Fetching movies for room ${data.code}...`);
     const movies = await fetchMovieQueue(apiKey);
     setMovieQueue(data.code, movies);
-    console.log(`Movies ready for room ${data.code}. Starting game.`);
+    markMoviesReady(data.code);
+    console.log(`Movies ready for room ${data.code}.`);
 
-    io.to(data.code).emit("game:start");
+    if (canStartGame(data.code)) {
+      console.log(`Starting game for room ${data.code}.`);
+      io.to(data.code).emit("game:start");
+    }
+  });
+
+  socket.on("wait:ready", ({ code }: { code: string }) => {
+    markPlayerReady(code, socket.id);
+    console.log(`Player ${socket.id} is ready in room ${code}`);
+
+    if (canStartGame(code)) {
+      console.log(`Starting game for room ${code}.`);
+      io.to(code).emit("game:start");
+    }
   });
 
   socket.on("game:ready", async ({ code }: { code: string }) => {

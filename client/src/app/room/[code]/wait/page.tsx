@@ -23,6 +23,7 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     socket.connect();
+    socket.emit("wait:ready", { code: codeRef.current });
 
     socket.on("room:ready", () => {
       setFriendJoined(true);
@@ -37,7 +38,7 @@ export default function WaitingRoom() {
       socket.off("room:ready");
       socket.off("game:start");
     };
-  }, [code, name, router]);
+  }, [router]);
 
 return (
     <main className="full-height bg-[#0D9488] flex flex-col items-center justify-center p-6">
