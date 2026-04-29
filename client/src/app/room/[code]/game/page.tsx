@@ -255,7 +255,7 @@ export default function GameScreen() {
           )}
 
           {movie ? (
-            <>
+            <div key={movie.id} className="animate-slide-in">
               {/* Poster — centered in white padded area */}
               <div className="bg-white p-4 pb-0">
                 <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden border border-black/10">
@@ -322,7 +322,7 @@ export default function GameScreen() {
                   <span>TMDB Rating: ⭐ {movie.vote_average.toFixed(1)}</span>
                 </div>
               </div>
-            </>
+            </div>
           ) : (
             /* Loading state while waiting for first movie */
             <div className="flex items-center justify-center h-64">
