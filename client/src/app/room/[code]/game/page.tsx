@@ -99,6 +99,16 @@ export default function GameScreen() {
     };
   }, [router]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") handleSkip();
+      if (e.key === "ArrowRight") handleCheck();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [movie, isWaiting]);
+
   function handleSkip() {
     if (isWaiting || !movie) return;
     socket.emit("movie:skip", { code, movieId: movie.id });
