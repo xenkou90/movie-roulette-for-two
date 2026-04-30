@@ -65,7 +65,7 @@ export default function JoinRoom() {
             font-[family-name:var(--font-mono)]
             text-xs uppercase tracking-widest
             text-black/50 hover:text-black
-            transition-colors duration-150  
+            transition-colors duration-150
           "
         >
           ← Back
@@ -84,7 +84,7 @@ export default function JoinRoom() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Marco"
-            maxLength={20}
+            maxLength={15}
             className="
               border-[3px] border-black
               rounded-lg px-4 py-3

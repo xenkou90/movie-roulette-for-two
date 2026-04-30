@@ -55,6 +55,23 @@ app.get("/health", (req, res) => {
 
 const enrichingInProgress = new Set<number>();
 
+function validateRoomData(data: { code: string; name: string }): string | null {
+  if (typeof data.code !== "string" || !/^\d{5}$/.test(data.code)) {
+    return "Code must be exactly 5 digits.";
+  }
+  if (typeof data.name !== "string") {
+    return "Name is required.";
+  }
+  const trimmed = data.name.trim();
+  if(trimmed.length === 0) {
+    return "Name cannot be empty.";
+  }
+  if (trimmed.length > 15) {
+    return "Name must be 15 characters or fewer.";
+  }
+  return null;
+}
+
 async function getEnrichedMovie(code: string, index: number) {
   const room = getRoom(code);
   if (!room || !room.movies[index]) return null;
@@ -81,11 +98,18 @@ io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
   socket.on("room:create", (data: { code: string; name: string }) => {
+    const validationError = validateRoomData(data);
+    if (validationError) {
+      socket.emit("room:error", { message: validationError });
+      return;
+    }
+
     const existingRoom = getRoom(data.code);
     if (existingRoom) {
       socket.emit("room:error", { message: "Room code already in use." });
       return;
     }
+
     const player = { id: socket.id, name: data.name };
     const room = createRoom(data.code, player);
     socket.join(data.code);
@@ -95,11 +119,18 @@ io.on("connection", (socket) => {
   });
 
   socket.on("room:join", async (data: { code: string; name: string }) => {
+    const validationError = validateRoomData(data);
+    if (validationError) {
+      socket.emit("room:error", { message: validationError });
+      return;
+    }
+
     const room = joinRoom(data.code, { id: socket.id, name: data.name });
     if (!room) {
       socket.emit("room:error", { message: "Room not found or already full." });
       return;
     }
+
     socket.join(data.code);
     initPlayerChoices(socket.id);
     console.log(`${data.name} joined room ${data.code}`);
