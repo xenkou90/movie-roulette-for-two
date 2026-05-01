@@ -8,6 +8,44 @@ const GENRE_MAP: Record<number, string> = {
   10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western",
 };
 
+const RATE_LIMIT_PER_SECOND = 30;
+const QUEUE_INTERVAL_MS = 1000 / RATE_LIMIT_PER_SECOND;
+
+let lastRequestTime = 0;
+const requestQueue: Array<() =>void> = [];
+let processing = false;
+
+async function processQueue() {
+  if (processing) return;
+  processing = true;
+
+  while (requestQueue.length > 0) {
+    const now = Date.now();
+    const wait = Math.max(0, QUEUE_INTERVAL_MS - (now - lastRequestTime));
+
+    if (wait > 0) {
+      await new Promise((r) => setTimeout(r, wait));
+    }
+
+    const next = requestQueue.shift();
+    if (next) {
+      lastRequestTime = Date.now();
+      next();
+    }
+  }
+
+  processing = false;
+}
+
+function rateLimitedFetch(url: string): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    requestQueue.push(() => {
+      fetch(url).then(resolve).catch(reject);
+    });
+    processQueue();
+  });
+}
+
 export interface Movie {
   id: number;
   title: string;
@@ -26,7 +64,7 @@ export async function fetchMovieQueue(apiKey: string): Promise<Movie[]> {
   const pages = [1, 2, 3];
 
   const requests = pages.map((page) =>
-    fetch(
+    rateLimitedFetch(
       `${TMDB_BASE}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`
     ).then((res) => res.json())
   );
@@ -46,9 +84,15 @@ export async function fetchMovieQueue(apiKey: string): Promise<Movie[]> {
 
 export async function enrichMovieDetails(movie: Movie, apiKey: string): Promise<Movie> {
   try {
-    const res = await fetch(
+    const res = await rateLimitedFetch(
       `${TMDB_BASE}/movie/${movie.id}?api_key=${apiKey}&append_to_response=external_ids`
     );
+
+    if (res.status === 429) {
+      console.warn(`TMDB rate limit hit for ${movie.title}, marking as fetched anyway.`);
+      return { ...movie, details_fetched: true };
+    }
+
     const data = await res.json() as {
       runtime: number;
       external_ids: { imdb_id: string };
