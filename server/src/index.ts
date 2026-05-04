@@ -111,7 +111,20 @@ io.on("connection", (socket) => {
     }
 
     const player = { id: socket.id, name: data.name };
-    const room = createRoom(data.code, player);
+
+    const abandonTimeout = setTimeout(() => {
+      const stillThere = getRoom(data.code);
+      if (stillThere && stillThere.players.length < 2) {
+        console.log(`Room ${data.code} abandoned - no second player after 30 minutes. Cleaning up.`);
+        io.to(data.code).emit("room:abandoned");
+        for (const p of stillThere.players) {
+          cleanupPlayer(p.id);
+        }
+        deleteRoom(data.code);
+      }
+    }, 30 * 60 * 1000);
+
+    const room = createRoom(data.code, player, abandonTimeout);
     socket.join(data.code);
     initPlayerChoices(socket.id);
     console.log(`Room created: ${room.code} by ${player.name}`);

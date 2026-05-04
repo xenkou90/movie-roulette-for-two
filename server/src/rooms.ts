@@ -12,17 +12,23 @@ export interface Room {
   movies: Movie[];
   readyPlayerIds: Set<string>;
   moviesReady: boolean;
+  abandonTimeout?: NodeJS.Timeout;
 }
 
 const rooms: Record<string, Room> = {};
 
-export function createRoom(code: string, player: Omit<Player, "movieIndex">): Room {
+export function createRoom(
+  code: string,
+  player: Omit<Player, "movieIndex">,
+  abandonTimeout: NodeJS.Timeout
+): Room {
   const room: Room = {
     code,
     players: [{ ...player, movieIndex: 0 }],
     movies: [],
     readyPlayerIds: new Set<string>(),
     moviesReady: false,
+    abandonTimeout,
   };
   rooms[code] = room;
   return room;
@@ -33,6 +39,10 @@ export function joinRoom(code: string, player: Omit<Player, "movieIndex">): Room
   if (!room) return null;
   if (room.players.length >= 2) return null;
   room.players.push({ ...player, movieIndex: 0 });
+  if (room.abandonTimeout) {
+    clearTimeout(room.abandonTimeout);
+    room.abandonTimeout = undefined;
+  }
   return room;
 }
 
@@ -57,11 +67,18 @@ export function removePlayerFromRoom(code: string, playerId: string): void {
   if (!room) return;
   room.players = room.players.filter((p) => p.id !== playerId);
   if (room.players.length === 0) {
+    if (room.abandonTimeout) {
+      clearTimeout(room.abandonTimeout);
+    }
     delete rooms[code];
   }
 }
 
 export function deleteRoom(code: string): void {
+  const room = rooms[code];
+  if (room?.abandonTimeout) {
+    clearTimeout(room.abandonTimeout);
+  }
   delete rooms[code];
 }
 

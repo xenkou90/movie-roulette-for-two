@@ -34,9 +34,14 @@ export default function WaitingRoom() {
       router.replace(`/room/${codeRef.current}/game?name=${encodeURIComponent(nameRef.current)}`);
     });
 
+    socket.on("room:abandoned", () => {
+      router.replace("/");
+    });
+
     return () => {
       socket.off("room:ready");
       socket.off("game:start");
+      socket.off("room:abandoned");
     };
   }, [router]);
 
