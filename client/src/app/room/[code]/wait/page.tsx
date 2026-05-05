@@ -17,6 +17,7 @@ export default function WaitingRoom() {
   const [statusText, setStatusText] = useState(
     isHost ? "Waiting for your friend..." : "Your friend is getting things ready..."
   );
+  const [abandoned, setAbandoned] = useState(false);
 
   const codeRef = useRef(code);
   const nameRef = useRef(name);
@@ -35,7 +36,10 @@ export default function WaitingRoom() {
     });
 
     socket.on("room:abandoned", () => {
-      router.replace("/");
+      setAbandoned(true);
+      setTimeout(() => {
+        router.replace("/");
+      }, 4000);
     });
 
     return () => {
@@ -46,7 +50,60 @@ export default function WaitingRoom() {
   }, [router]);
 
 return (
-    <main className="full-height bg-[#0D9488] flex flex-col items-center justify-center p-6">
+    <main className="full-height bg-[#0D9488] flex flex-col items-center justify-center p-6 relative">
+
+      {abandoned && (
+        <div
+          className="
+          absolute inset-0
+          bg-black/70
+          backdrop-blur-sm
+          flex items-center justify-center
+          z-50 p-6
+          "
+        >
+          <div
+            className="
+              bg-[#FFFDF4]
+              border-[3px] border-black
+              shadow-[6px_6px_0px_#000000]
+              rounded-xl
+              px-6 py-8
+              w-full max-w-xs
+              flex flex-col items-center gap-4
+              text-center
+            "
+          >
+            <div
+              className="
+                bg-[#FF3CAC]
+                border-[2px] border-black
+                rounded-lg px-3 py-1
+                font-[family-name:var(--font-heading)]
+                text-sm uppercase tracking-wide text-wide
+              "
+            >
+              Movie night cancelled
+            </div>
+
+            <p
+              className="
+                font-[family-name:var(--font-mono)]
+                text-sm text-black/80
+                leading-relaxed
+              "
+            >
+              Looks like your friend never made it. Heading back home — try again when you&apos;re both ready.
+            </p>
+
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-2 mb-8">
         <div className="w-3 h-3 rounded-full bg-[#FF3CAC] border-2 border-black" />
