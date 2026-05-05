@@ -35,7 +35,7 @@ export default function Home() {
           text-center
         "
       >
-        <h1 
+        <h1
           className="
             font-[family-name:var(--font-heading)]
             text-5xl leading-tight
@@ -110,6 +110,18 @@ export default function Home() {
         <div className="w-4 h-2 rounded-full bg-white border border-black" />
         <div className="w-8 h-2 rounded-full bg-[#FF3CAC] border border-black" />
       </div>
+
+    <p
+      className="
+        mt-6
+        font-[family-name:var(--font-mono)]
+        text-[10px] uppercase tracking-[0.2em]
+        text-black/40 text-center
+      "
+    >
+      Imagined, created, designed by Xeno
+    </p>
+
     </main>
   );
 }
