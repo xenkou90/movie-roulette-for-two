@@ -41,6 +41,7 @@ export default function GameScreen() {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isWaiting, setIsWaiting] = useState(false);
   const [toast, setToast] = useState("");
+  const [loadingNext, setLoadingNext] = useState(false);
 
   const codeRef = useRef(code);
   const nameRef = useRef(name);
@@ -64,11 +65,13 @@ export default function GameScreen() {
     socket.on("movie:show", ({ movie }: { movie: Movie }) => {
       setMovie(movie);
       setIsWaiting(false);
+      setLoadingNext(false);
     });
 
     socket.on("match:missed", () => {
       showToast("They passed on that one — keep looking!");
       setIsWaiting(false);
+      setLoadingNext(false);
     });
 
     socket.on("match:found", ({ movie }: { movie: Movie }) => {
@@ -111,6 +114,7 @@ export default function GameScreen() {
 
   function handleSkip() {
     if (isWaiting || !movie) return;
+    setLoadingNext(true);
     socket.emit("movie:skip", { code, movieId: movie.id });
   }
 
@@ -120,7 +124,7 @@ export default function GameScreen() {
     socket.emit("movie:check", { code, movieId: movie.id });
   }
 
-  const buttonsDisabled = isWaiting || !movie;
+  const buttonsDisabled = isWaiting || !movie || loadingNext;
 
   const posterUrl = movie?.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
@@ -260,6 +264,20 @@ export default function GameScreen() {
               <div className="w-4 h-4 rounded-full bg-[#FFE500] animate-ping" />
               <p className="font-[family-name:var(--font-mono)] text-white text-xs tracking-widest uppercase">
                 Waiting...
+              </p>
+            </div>
+          )}
+
+          {loadingNext && !isWaiting && (
+            <div
+              className="
+                absolute inset-0 bg-white/80 rounded-xl
+                flex flex-col items-center justify-center z-10 gap-2
+              "
+            >
+              <div className="w-4 h-4 rounded-full bg-[#0D9488] animate-pulse" />
+              <p className="font-[family-name:var(--font-mono)] text-black/70 text-xs tracking-widest uppercase">
+                Loading next...
               </p>
             </div>
           )}
