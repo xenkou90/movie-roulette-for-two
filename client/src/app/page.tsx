@@ -310,6 +310,19 @@ export default function Home() {
             >
               Tip: on desktop, use ← and → arrow keys to swipe.
             </p>
+
+            {/* TMDB credit */}
+            <p className="font-[family-name:var(--font-mono)] text-[10px] text-black/40 text-center leading-relaxed">
+              Movie data from{" "}
+              <a
+                href="https://www.themoviedb.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-black/60 transition-colors duration-150"
+              >
+                TMDB
+              </a>
+            </p>
         </div>
       </div>
       )}
