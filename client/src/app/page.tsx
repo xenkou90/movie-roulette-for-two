@@ -16,6 +16,7 @@ export default function Home() {
         p-6
         font-[family-name:var(--font-mono)]
         relative
+        overflow-hidden
       "
     >
       {/* Info button - top right corner */}
