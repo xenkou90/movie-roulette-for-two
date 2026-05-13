@@ -85,6 +85,7 @@ export default function JoinRoom() {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Marco"
             maxLength={15}
+            autoFocus
             className="
               border-[3px] border-black
               rounded-lg px-4 py-3

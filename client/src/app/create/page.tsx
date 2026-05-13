@@ -79,6 +79,7 @@ export default function CreateRoom() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Sofia"
               maxLength={15}
+              autoFocus
               className="
                 border-[3px] border-black
                 rounded-lg px-4 py-3
