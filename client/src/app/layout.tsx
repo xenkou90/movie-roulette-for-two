@@ -14,11 +14,6 @@ const spaceMono = Space_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Movie Roulette for 2",
-  description: "Swipe. Match. Watch.",
-};
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -40,3 +35,27 @@ export default function RootLayout({
     </html>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Movie Roulette for 2",
+  description: "Can't agree on what to watch? Swipe through movies together and we'll decide your movie night.",
+  openGraph: {
+    title: "Movie Roulette for 2",
+    description: "Can't agree on what to watch? Swipe through movies together and we'll decide your movie night.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Movie Roulette for 2 — swipe, match, watch",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Movie Roulette for 2",
+    description: "Can't agree on what to watch? Swipe through movies together and we'll decide your movie night.",
+    images: ["/og-image.png"],
+  },
+};
