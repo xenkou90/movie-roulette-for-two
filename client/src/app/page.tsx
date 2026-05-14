@@ -40,7 +40,7 @@ export default function Home() {
       </button>
 
       {/* Three decorative dots at the top */}
-      <div className="flex gap-2 mb-8">
+      <div className="flex gap-2 mb-8 fade-in-1">
         <div className="w-3 h-3 rounded-full bg-[#FF3CAC] border-2 border-black" />
         <div className="w-3 h-3 rounded-full bg-[#FFE500] border-2 border-black" />
         <div className="w-3 h-3 rounded-full bg-white border-2 border-black" />
@@ -57,6 +57,7 @@ export default function Home() {
           mb-6
           w-full max-w-sm
           text-center
+          fade-in-2
         "
       >
         <h1
@@ -92,7 +93,7 @@ export default function Home() {
       </div>
 
       {/* CTA Buttons */}
-      <div className="flex flex-col gap-4 w-full max-w-sm">
+      <div className="flex flex-col gap-4 w-full max-w-sm fade-in-3">
         <button
           onClick={() => router.push("/create")}
           className="
@@ -129,7 +130,7 @@ export default function Home() {
       </div>
 
       {/* Decorative pills */}
-      <div className="flex gap-2 mt-8">
+      <div className="flex gap-2 mt-8 fade-in-4">
         <div className="w-8 h-2 rounded-full bg-[#FFE500] border border-black" />
         <div className="w-4 h-2 rounded-full bg-white border border-black" />
         <div className="w-8 h-2 rounded-full bg-[#FF3CAC] border border-black" />
@@ -142,6 +143,7 @@ export default function Home() {
           font-[family-name:var(--font-mono)]
           text-[10px] uppercase tracking-[0.2em]
           text-black/40 text-center
+          fade-in-5
         "
       >
         Imagined, created, designed by Xeno
