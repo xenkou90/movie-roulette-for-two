@@ -19,6 +19,40 @@ export default function WaitingRoom() {
   );
   const [abandoned, setAbandoned] = useState(false);
 
+  const [copyStatus, setCopyStatus] = useState("");
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const shareUrl = `${appUrl}/join?code=${code}`;
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopyStatus("Copied!");
+      setTimeout(() => setCopyStatus(""), 2000);
+    } catch {
+      setCopyStatus("Failed");
+      setTimeout(() => setCopyStatus(""), 2000);
+    }
+  }
+
+  async function handleShare() {
+    const shareData = {
+      title: "Movie Roulette for 2",
+      text: "Let's pick a movie tonight. Join my room.",
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // User cancelled the share dialog — silent, no action
+      }
+    } else {
+      handleCopy();
+    }
+  }
+
   const codeRef = useRef(code);
   const nameRef = useRef(name);
 
@@ -80,7 +114,7 @@ return (
                 border-[2px] border-black
                 rounded-lg px-3 py-1
                 font-[family-name:var(--font-heading)]
-                text-sm uppercase tracking-wide text-wide
+                text-sm uppercase tracking-wide text-white
               "
             >
               Movie night cancelled
@@ -143,6 +177,41 @@ return (
               "
             >
               {code}
+            </div>
+
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={handleCopy}
+                className="
+                  flex-1
+                  bg-[#FFFDF4]
+                  border-[3px] border-black
+                  shadow-[3px_3px_0px_#000000]
+                  rounded-lg py-2
+                  font-[family-name:var(--font-heading)]
+                  text-sm text-black uppercase tracking-wide
+                  active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+                  transition-all duration-75
+                "
+              >
+                {copyStatus || "Copy Link"}
+              </button>
+              <button
+                onClick={handleShare}
+                className="
+                  flex-1
+                  bg-[#FF3CAC]
+                  border-[3px] border-black
+                  shadow-[3px_3px_0px_#000000]
+                  rounded-lg py-2
+                  font-[family-name:var(--font-heading)]
+                  text-sm text-white uppercase tracking-wide
+                  active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+                  transition-all duration-75
+                "
+              >
+                Share
+              </button>
             </div>
           </div>
         )}

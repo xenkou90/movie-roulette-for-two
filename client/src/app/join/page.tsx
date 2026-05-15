@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import socket from "@/lib/socket";
 
 export default function JoinRoom() {
@@ -10,8 +10,17 @@ export default function JoinRoom() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
 
+  const searchParams = useSearchParams();
+
   const nameRef = useRef(name);
   const codeRef = useRef(code);
+
+  useEffect(() => {
+    const codeFromUrl = searchParams.get("code");
+    if (codeFromUrl && /^\d{5}$/.test(codeFromUrl)) {
+      setCode(codeFromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     nameRef.current = name;
