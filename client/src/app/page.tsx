@@ -314,6 +314,21 @@ export default function Home() {
               Tip: on desktop, use ← and → arrow keys to swipe.
             </p>
 
+
+            {/* Privacy note */}
+            <div
+              className="
+                bg-[#0D9488]/10
+                border-[2px] border-black/20
+                rounded-lg px-3 py-2
+                font-[family-name:var(--font-mono)]
+                text-[10px] text-black/70 leading-relaxed
+                text-center
+              "
+            >
+              No accounts. No tracking. Your name lives in server memory while you play, then it&apos;s gone.
+            </div>
+
             {/* TMDB credit */}
             <p className="font-[family-name:var(--font-mono)] text-[10px] text-black/40 text-center leading-relaxed">
               Movie data from{" "}
