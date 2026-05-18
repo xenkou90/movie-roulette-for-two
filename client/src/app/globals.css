@@ -60,3 +60,15 @@ body {
   opacity: 0;
   animation: fade-up 400ms ease-out 600ms forwrds;
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transfrom: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 400ms ease-in-out;
+}

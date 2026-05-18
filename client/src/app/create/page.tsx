@@ -9,6 +9,7 @@ export default function CreateRoom() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [shakeField, setShakeField] = useState<"name" | "code" | "">("");
 
   const nameRef = useRef(name);
   useEffect(() => {
@@ -33,8 +34,18 @@ export default function CreateRoom() {
   }, [router]);
 
   function handleSubmit() {
-    if (!name.trim()) { setError("Enter your name."); return; }
-    if (!/^\d{5}$/.test(code)) { setError("Code must be exactly 5 digits."); return; }
+    if (!name.trim()) {
+      setError("Enter your name.");
+      setShakeField("name");
+      setTimeout(() => setShakeField(""), 500);
+      return;
+    }
+    if (!/^\d{5}$/.test(code)) {
+      setError("Code must be exactly 5 digits.");
+      setShakeField("code");
+      setTimeout(() => setShakeField(""), 500);
+      return;
+    }
     setError("");
     socket.emit("room:create", { code, name: name.trim() });
   }
@@ -80,14 +91,15 @@ export default function CreateRoom() {
               placeholder="e.g. Sofia"
               maxLength={15}
               autoFocus
-              className="
+              className={`
                 border-[3px] border-black
                 rounded-lg px-4 py-3
                 font-[family-name:var(--font-mono)]
                 text-black bg-white
                 focus:outline-none focus:shadow-[3px_3px_0px_#000000]
                 placeholder:text-black/30
-              "
+                ${shakeField === "name" ? "animate-shake" : ""}
+              `}
             />
           </div>
 
@@ -100,14 +112,15 @@ export default function CreateRoom() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 5))}
               placeholder="e.g. 42068"
-              className="
+              className={`
                 border-[3px] border-black
                 rounded-lg px-4 py-3
                 font-[family-name:var(--font-mono)]
                 text-black bg-white text-center text-2xl tracking-[0.5em]
                 focus:outline-none focus:shadow-[3px_3px_0px_#000000]
                 placeholder:text-black/30 placeholder:text-base placeholder:tracking-normal
-              "
+                ${shakeField === "code" ? "animate-shake" : ""}
+              `}
             />
           </div>
 
