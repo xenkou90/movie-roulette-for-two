@@ -5,6 +5,39 @@ import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import socket from "@/lib/socket";
 
+function playMatchSound() {
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioCtx();
+
+    // C major chord arpeggio: C5, E5, G5
+    const notes = [523.25, 659.25, 783.99];
+
+    notes.forEach((freq, i) => {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      oscillator.type = "sine";
+      oscillator.frequency.value = freq;
+
+      const startTime = ctx.currentTime + i * 0.12;
+      const duration = 0.5;
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    });
+  } catch {
+    //Audio not supported or blocked — silently skip
+  }
+}
+
 export default function MatchScreen() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -33,6 +66,20 @@ export default function MatchScreen() {
   useEffect(() => {
     socket.connect();
     const t = setTimeout(() => setShow(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  const soundPlayed = useRef(false);
+
+  useEffect(() => {
+    socket.connect();
+    const t = setTimeout(() => setShow(true), 100);
+
+    if (!soundPlayed.current) {
+      soundPlayed.current = true;
+      playMatchSound();
+    }
+
     return () => clearTimeout(t);
   }, []);
 
