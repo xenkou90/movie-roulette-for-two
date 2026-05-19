@@ -10,6 +10,7 @@ export default function CreateRoom() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [shakeField, setShakeField] = useState<"name" | "code" | "">("");
+  const [submitting, setSubmitting] = useState(false);
 
   const nameRef = useRef(name);
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function CreateRoom() {
 
     socket.on("room:error", ({ message }: { message: string }) => {
       setError(message);
+      setSubmitting(false);
     });
 
     return () => {
@@ -47,6 +49,7 @@ export default function CreateRoom() {
       return;
     }
     setError("");
+    setSubmitting(true);
     socket.emit("room:create", { code, name: name.trim() });
   }
 
@@ -132,6 +135,7 @@ export default function CreateRoom() {
 
           <button
             onClick={handleSubmit}
+            disabled={submitting}
             className="
               w-full
               bg-[#FF3CAC]
@@ -142,9 +146,10 @@ export default function CreateRoom() {
               text-xl text-white uppercase tracking-wide
               active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
               transition-all duration-75
+              disabled:opacitgy-60 disabled:cursor-not-allowed
             "
           >
-            Create Room
+            {submitting ? "Creating..." : "Create Room"}
           </button>
         </div>
     </main>

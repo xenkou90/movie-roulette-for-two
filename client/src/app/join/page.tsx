@@ -10,6 +10,7 @@ export default function JoinRoom() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [shakeField, setShakeField] = useState<"name" | "code" | "">("");
+  const [submitting, setSubmitting] = useState(false);
 
   const searchParams = useSearchParams();
 
@@ -40,6 +41,7 @@ export default function JoinRoom() {
 
     socket.on("room:error", ({ message }: { message: string }) => {
       setError(message);
+      setSubmitting(false);
     });
 
     return () => {
@@ -62,6 +64,7 @@ export default function JoinRoom() {
       return;
     }
     setError("");
+    setSubmitting(true);
     socket.emit("room:join", { code, name: name.trim() });
   }
 
@@ -147,6 +150,7 @@ export default function JoinRoom() {
 
         <button
           onClick={handleSubmit}
+          disabled={submitting}
           className="
             w-full
             bg-[#FFFDF4]
@@ -157,9 +161,10 @@ export default function JoinRoom() {
             text-xl text-black uppercase tracking-wide
             active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
             transition-all duration-75
+            disabled:opacity-60 disabled:cursor-not-allowed
           "
         >
-          Join Room
+          {submitting ? "Joining..." : "Join Room"}
         </button>
       </div>
     </main>
