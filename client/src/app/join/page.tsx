@@ -11,7 +11,6 @@ export default function JoinRoom() {
   const [error, setError] = useState("");
   const [shakeField, setShakeField] = useState<"name" | "code" | "">("");
 
-
   const searchParams = useSearchParams();
 
   const nameRef = useRef(name);
@@ -63,7 +62,7 @@ export default function JoinRoom() {
       return;
     }
     setError("");
-    socket.emit("room:create", { code, name: name.trim() });
+    socket.emit("room:join", { code, name: name.trim() });
   }
 
   return (
@@ -135,7 +134,7 @@ export default function JoinRoom() {
               text-black bg-white text-center text-2xl tracking-[0.5em]
               focus:outline-none focus:shadow-[3px_3px_0px_#000000]
               placeholder:text-black/30 placeholder:text-base placeholder:tracking-normal
-              ${shakeField === "name" ? "animate-shake" : ""}
+              ${shakeField === "code" ? "animate-shake" : ""}
             `}
           />
         </div>
