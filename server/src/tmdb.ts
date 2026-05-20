@@ -61,25 +61,47 @@ export interface Movie {
 }
 
 export async function fetchMovieQueue(apiKey: string): Promise<Movie[]> {
-  const pages = [1, 2, 3];
+  const sources = [
+    // Currently popular
+    `${TMDB_BASE}/movie/popular?api_key=${apiKey}&language=en-US&page=1`,
+    `${TMDB_BASE}/movie/popular?api_key=${apiKey}&language=en-US&page=2`,
 
-  const requests = pages.map((page) =>
-    rateLimitedFetch(
-      `${TMDB_BASE}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`
-    ).then((res) => res.json())
+    // Highly rated since 2000 - modern classics
+    `${TMDB_BASE}/discover/movie?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=500&primary_release_date.gte=2000-01-01&page=1`,
+    `${TMDB_BASE}/discover/movie?api_key=${apiKey}&language=en-US&sort_by=vote_average.desc&vote_count.gte=500&primary_release_date.gte=2000-01-01&pagr=2`,
+
+    // Currently in cinemas
+    `${TMDB_BASE}/movie/now_playing?api_key=${apiKey}&language=en-US&page=1`,
+  ];
+
+  const requests = sources.map((url) =>
+    rateLimitedFetch(url).then((res) => res.json())
   );
 
   const results = await Promise.all(requests) as Array<{ results: Movie[] }>;
 
-  const movies: Movie[] = results
+  const allMovies = results
     .flatMap((res) => res.results)
-    .filter((m: Movie) => m.poster_path)
-    .map((m: Movie) => ({
-      ...m,
-      genres: m.genre_ids.map((id) => GENRE_MAP[id]).filter(Boolean),
-    }));
+    .filter((m: Movie) => {
+      if (!m.poster_path) return false;
+      const year = m.release_date ? new Date(m.release_date).getFullYear() : 0;
+      return year >= 2000;
+    });
 
-  return shuffle(movies);
+  // Deduplicate by ID — same movie can appear in multiple sources
+  const seen = new Set<number>();
+  const unique: Movie[] = [];
+  for (const movie of allMovies) {
+    if (!seen.has(movie.id)) {
+      seen.add(movie.id);
+      unique.push({
+        ...movie,
+        genres: movie.genre_ids.map((id) => GENRE_MAP[id]).filter(Boolean),
+      });
+    }
+  }
+
+  return shuffle(unique);
 }
 
 export async function enrichMovieDetails(movie: Movie, apiKey: string): Promise<Movie> {
