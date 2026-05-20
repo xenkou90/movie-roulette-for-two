@@ -44,6 +44,7 @@ export default function GameScreen() {
   const [loadingNext, setLoadingNext] = useState(false);
   const [idlePrompt, setIdlePrompt] = useState(false);
   const [abandoned, setAbandoned] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "reconnecting">("connected");
 
   const codeRef = useRef(code);
   const nameRef = useRef(name);
@@ -116,11 +117,26 @@ export default function GameScreen() {
       timeoutsRef.current.push(overlayTimeout);
     });
 
+    socket.on("disconnect", () => {
+      setConnectionStatus("disconnected");
+    });
+
+    socket.io.on("reconnect_attempt", () => {
+      setConnectionStatus("reconnecting");
+    });
+
+    socket.io.on("reconnect", () => {
+      setConnectionStatus("connected");
+    });
+
     return () => {
       socket.off("movie:show");
       socket.off("match:missed");
       socket.off("match:found");
       socket.off("room:playerLeft");
+      socket.off("disconnect");
+      socket.io.off("reconnect_attempt");
+      socket.io.off("reconnect");
       timeoutsRef.current.forEach((t: NodeJS.Timeout) => clearTimeout(t));
       timeoutsRef.current = [];
       if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
@@ -181,6 +197,25 @@ export default function GameScreen() {
           "
         >
           {toast}
+        </div>
+      )}
+
+      {/* Connection status banner */}
+      {connectionStatus !== "connected" && (
+        <div
+          className="
+            absolute top-0 left-0 right-0
+            bg-[#FF3CAC] text-white
+            font-[family-name:var(--font-mono)] text-xs
+            uppercase tracking-widest
+            py-2 text-center
+            border-b-[3px] border-black
+            z-50
+            flex items-center justify-center gap-2
+          "
+        >
+          <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          {connectionStatus === "reconnecting" ? "Reconnecting..." : "Connection lost"}
         </div>
       )}
 
