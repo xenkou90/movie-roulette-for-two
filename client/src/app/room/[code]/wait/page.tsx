@@ -21,6 +21,8 @@ export default function WaitingRoom() {
 
   const [copyStatus, setCopyStatus] = useState("");
 
+  const waitReadySent = useRef(false);
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   const shareUrl = `${appUrl}/join?code=${code}`;
 
@@ -58,7 +60,11 @@ export default function WaitingRoom() {
 
   useEffect(() => {
     socket.connect();
-    socket.emit("wait:ready", { code: codeRef.current });
+
+    if (!waitReadySent.current) {
+      waitReadySent.current = true;
+      socket.emit("wait:ready", { code: codeRef.current });
+    }
 
     socket.on("room:ready", () => {
       setFriendJoined(true);
