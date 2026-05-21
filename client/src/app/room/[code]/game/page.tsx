@@ -46,6 +46,9 @@ export default function GameScreen() {
   const [abandoned, setAbandoned] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "reconnecting">("connected");
 
+  const [connectionLost, setConnectionLost] = useState(false);
+  const disconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const codeRef = useRef(code);
   const nameRef = useRef(name);
   const gameReadySent = useRef(false);
@@ -119,6 +122,13 @@ export default function GameScreen() {
 
     socket.on("disconnect", () => {
       setConnectionStatus("disconnected");
+
+      disconnectTimeoutRef.current = setTimeout(() => {
+        setConnectionLost(true);
+        setTimeout(() => {
+          router.replace("/");
+        }, 3000);
+      }, 4000);
     });
 
     socket.io.on("reconnect_attempt", () => {
@@ -127,6 +137,10 @@ export default function GameScreen() {
 
     socket.io.on("reconnect", () => {
       setConnectionStatus("connected");
+      if (disconnectTimeoutRef.current) {
+        clearTimeout(disconnectTimeoutRef.current);
+        disconnectTimeoutRef.current = null;
+      }
     });
 
     return () => {
@@ -141,6 +155,7 @@ export default function GameScreen() {
       timeoutsRef.current = [];
       if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
       if (finalTimeoutRef.current) clearTimeout(finalTimeoutRef.current);
+      if (disconnectTimeoutRef.current) clearTimeout(disconnectTimeoutRef.current);
     };
   }, [router]);
 
@@ -264,6 +279,58 @@ export default function GameScreen() {
               "
             >
               Returning home — create or join a room to continue.
+            </p>
+
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2 h-2 rounded-full bg-black animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Connection lost overlay */}
+      {connectionLost && (
+        <div
+          className="
+            absolute inset-0
+            bg-black/70 backdrop-blur-sm
+            flex items-center justify-center
+            z-50 p-6
+          "
+        >
+          <div
+            className="
+              bg-[#FFFDF4]
+              border-[3px] border-black
+              shadow-[6px_6px_0px_#000000]
+              rounded-xl
+              px-6 py-8
+              w-full max-w-xs
+              flex flex-col items-center gap-4
+              text-center
+            "
+          >
+            <div
+              className="
+                bg-[#FF3CAC]
+                border-[2px] border-black
+                rounded-lg px-3 py-1
+                font-[family-name:var(--font-heading)]
+                text-sm uppercase tracking-wide text-white
+              "
+            >
+              Connection lost
+            </div>
+
+            <p
+              className="
+                font-[family-name:var(--font-mono)]
+                text-sm text-black/80 leading-relaxed
+              "
+            >
+              We&apos;ve lost the signal. Heading home — start a new room when you&apos;re ready.
             </p>
 
             <div className="flex gap-1">
