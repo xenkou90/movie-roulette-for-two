@@ -19,21 +19,30 @@ export default function WaitingRoom() {
   );
   const [abandoned, setAbandoned] = useState(false);
 
-  const [copyStatus, setCopyStatus] = useState("");
-
   const waitReadySent = useRef(false);
+
+  const [copied, setCopied] = useState<"code" | "link" | "">("");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   const shareUrl = `${appUrl}/join?code=${code}`;
 
-  async function handleCopy() {
+  async function handleCopyCode() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied("code");
+      setTimeout(() => setCopied(""), 2000);
+    } catch {
+      // Clipboard unavailable — silently skip
+    }
+  }
+
+  async function handleCopyLink() {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      setCopyStatus("Copied!");
-      setTimeout(() => setCopyStatus(""), 2000);
+      setCopied("link");
+      setTimeout(() => setCopied(""), 2000);
     } catch {
-      setCopyStatus("Failed");
-      setTimeout(() => setCopyStatus(""), 2000);
+      // Clipboard unavailable — silently skip
     }
   }
 
@@ -48,10 +57,10 @@ export default function WaitingRoom() {
       try {
         await navigator.share(shareData);
       } catch {
-        // User cancelled the share dialog — silent, no action
+       handleCopyLink();
       }
     } else {
-      handleCopy();
+      handleCopyLink();
     }
   }
 
@@ -167,10 +176,11 @@ return (
         </h2>
 
         {isHost && (
-          <div className="flex flex-col items-center gap-2 w-full">
+          <div className="flex flex-col items-center gap-3 w-full">
             <p className="text-xs uppercase tracking-widest text-black/60 font-[family-name:var(--font-mono)]">
               Share this code
             </p>
+
             <div
               className="
                 bg-[#FFE500]
@@ -178,6 +188,7 @@ return (
                 shadow-[4px_4px_0px_#000000]
                 rounded-xl
                 px-6 py-3
+                w-full text-center
                 font-[family-name:var(--font-heading)]
                 text-5xl tracking-[0.3em] text-black
               "
@@ -185,9 +196,10 @@ return (
               {code}
             </div>
 
-            <div className="flex gap-2 w-full">
+            {/* Copy Code + Copy Link */}
+            <div className="flex gap-2 w-[92%]">
               <button
-                onClick={handleCopy}
+                onClick={handleCopyCode}
                 className="
                   flex-1
                   bg-[#FFFDF4]
@@ -200,25 +212,43 @@ return (
                   transition-all duration-75
                 "
               >
-                {copyStatus || "Copy Link"}
+                {copied === "code" ? "Copied!" : "Copy Code"}
               </button>
               <button
-                onClick={handleShare}
+                onClick={handleCopyLink}
                 className="
                   flex-1
-                  bg-[#FF3CAC]
+                  bg-[#FFFDF4]
                   border-[3px] border-black
                   shadow-[3px_3px_0px_#000000]
                   rounded-lg py-2
                   font-[family-name:var(--font-heading)]
-                  text-sm text-white uppercase tracking-wide
+                  text-sm text-black uppercase tracking-wide
                   active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
                   transition-all duration-75
                 "
               >
-                Share
+                {copied === "link" ? "Copied!" : "Copy Link"}
               </button>
             </div>
+
+            {/* Share link */}
+            <button
+              onClick={handleShare}
+              className="
+                w-[55%]
+                bg-[#FF3CAC]
+                border-[3px] border-black
+                shadow-[3px_3px_0px_#000000]
+                rounded-lg py-2
+                font-[family-name:var(--font-heading)]
+                text-sm text-white uppercase tracking-wide
+                active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+                transition-all duration-75
+              "
+            >
+              Share Link
+            </button>
           </div>
         )}
 
