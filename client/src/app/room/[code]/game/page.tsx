@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import socket from "@/lib/socket";
+import { vibrate } from "@/lib/haptics";
 
 interface Movie {
   id: number;
@@ -171,6 +172,7 @@ export default function GameScreen() {
 
   function handleSkip() {
     if (isWaiting || !movie) return;
+    vibrate(20);
     resetIdleTimer();
     setLoadingNext(true);
     socket.emit("movie:skip", { code, movieId: movie.id });
@@ -178,6 +180,7 @@ export default function GameScreen() {
 
   function handleCheck() {
     if (isWaiting || !movie) return;
+    vibrate(40);
     resetIdleTimer();
     setIsWaiting(true);
     socket.emit("movie:check", { code, movieId: movie.id });

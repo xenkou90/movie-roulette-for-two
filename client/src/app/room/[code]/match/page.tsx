@@ -4,6 +4,7 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import socket from "@/lib/socket";
+import { vibrate } from "@/lib/haptics";
 
 function playMatchSound() {
   try {
@@ -78,6 +79,7 @@ export default function MatchScreen() {
     if (!soundPlayed.current) {
       soundPlayed.current = true;
       playMatchSound();
+      vibrate([60, 40, 60, 40, 120]);
     }
 
     return () => clearTimeout(t);
