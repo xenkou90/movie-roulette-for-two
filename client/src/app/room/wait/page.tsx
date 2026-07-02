@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import socket from "@/lib/socket";
 
 export default function WaitingRoom() {
-  const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const code = params.code as string;
+  const code = searchParams.get("code") || "";
   const name = searchParams.get("name") || "Player";
   const isHost = searchParams.get("host") === "true";
 
@@ -68,6 +67,11 @@ export default function WaitingRoom() {
   const nameRef = useRef(name);
 
   useEffect(() => {
+    if (!codeRef.current) {
+      router.replace("/");
+      return;
+    }
+
     socket.connect();
 
     if (!waitReadySent.current) {
@@ -81,7 +85,7 @@ export default function WaitingRoom() {
     });
 
     socket.on("game:start", () => {
-      router.replace(`/room/${codeRef.current}/game?name=${encodeURIComponent(nameRef.current)}`);
+      router.replace(`/room/game?code=${codeRef.current}&name=${encodeURIComponent(nameRef.current)}`);
     });
 
     socket.on("room:abandoned", () => {

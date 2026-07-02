@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import socket from "@/lib/socket";
 import { vibrate } from "@/lib/haptics";
@@ -31,11 +31,10 @@ function formatReleaseDate(dateStr: string): string {
 }
 
 export default function GameScreen() {
-  const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const code = params.code as string;
+  const code = searchParams.get("code") || "";
   const name = searchParams.get("name") || "Player";
 
   const [partnerLeft, setPartnerLeft] = useState(false);
@@ -83,6 +82,11 @@ export default function GameScreen() {
   }
 
   useEffect(() => {
+    if (!codeRef.current) {
+      router.replace("/");
+      return;
+    }
+
     socket.connect();
     resetIdleTimer();
 
@@ -105,7 +109,7 @@ export default function GameScreen() {
 
     socket.on("match:found", ({ movie }: { movie: Movie }) => {
       router.replace(
-        `/room/${codeRef.current}/match?name=${encodeURIComponent(nameRef.current)}&movieId=${movie.id}&movieTitle=${encodeURIComponent(movie.title)}&moviePoster=${encodeURIComponent(movie.poster_path)}&movieYear=${movie.release_date.split("-")[0]}&imdbId=${movie.imdb_id ?? ""}`
+        `/room/match?code=${codeRef.current}&name=${encodeURIComponent(nameRef.current)}&movieId=${movie.id}&movieTitle=${encodeURIComponent(movie.title)}&moviePoster=${encodeURIComponent(movie.poster_path)}&movieYear=${movie.release_date.split("-")[0]}&imdbId=${movie.imdb_id ?? ""}`
       );
     });
 

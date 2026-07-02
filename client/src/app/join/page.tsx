@@ -36,7 +36,7 @@ export default function JoinRoom() {
     socket.connect();
 
     socket.on("room:ready", () => {
-      router.replace(`/room/${codeRef.current}/wait?name=${encodeURIComponent(nameRef.current)}&host=false`);
+      router.replace(`/room/wait?code=${codeRef.current}&name=${encodeURIComponent(nameRef.current)}&host=false`);
     });
 
     socket.on("room:error", ({ message }: { message: string }) => {

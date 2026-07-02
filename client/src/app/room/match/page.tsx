@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import socket from "@/lib/socket";
@@ -40,11 +40,10 @@ function playMatchSound() {
 }
 
 export default function MatchScreen() {
-  const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const code = params.code as string;
+  const code = searchParams.get("code") || "";
   const movieTitle = searchParams.get("movieTitle") || "";
   const moviePoster = searchParams.get("moviePoster") || "";
   const movieYear = searchParams.get("movieYear") || "";
@@ -64,15 +63,14 @@ export default function MatchScreen() {
   const [show, setShow] = useState(false);
   const hasLeft = useRef(false);
 
-  useEffect(() => {
-    socket.connect();
-    const t = setTimeout(() => setShow(true), 100);
-    return () => clearTimeout(t);
-  }, []);
-
   const soundPlayed = useRef(false);
 
   useEffect(() => {
+    if (!code) {
+      router.replace("/");
+    return;
+    }
+
     socket.connect();
     const t = setTimeout(() => setShow(true), 100);
 
@@ -83,7 +81,7 @@ export default function MatchScreen() {
     }
 
     return () => clearTimeout(t);
-  }, []);
+  }, [code, router]);
 
   return (
     <main className="full-height bg-[#FF3CAC] flex flex-col items-center justify-center p-4 relative overflow-hidden">
