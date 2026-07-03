@@ -25,8 +25,8 @@ import {
 dotenv.config();
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-
 const PORT = process.env.PORT || 3001;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 if (!TMDB_API_KEY) {
   console.error("Missing required environment variable: TMDB_API_KEY");
@@ -40,7 +40,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: CLIENT_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
